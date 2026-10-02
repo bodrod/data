@@ -13,7 +13,7 @@ const HEADERS = {
   'Accept': 'application/json'
 };
 
-async function fetchWithRetry(url, options = {}, retries = 3, delay = 3000) {
+async function fetchWithRetry(url, options = {}, retries = 3, delay = 300000) {
   for (let i = 0; i < retries; i++) {
     try {
       const res = await fetch(url, { headers: HEADERS, ...options });
