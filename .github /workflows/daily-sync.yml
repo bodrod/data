@@ -1,0 +1,42 @@
+name: Actualización Diaria Buylist Data
+
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Crear directorio data
+        run: mkdir -p data
+
+      - name: Ejecutar script de sincronización
+        run: node sync-data.js
+
+      - name: Commit y Push de archivos JSON
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add data/*.json
+          if git diff --staged --quiet; then
+            echo "No hay cambios en los JSONs para commitear."
+          else
+            git commit -m "bot: actualización diaria de precios TCG"
+            git pull --rebase origin main || true
+            git push origin HEAD:main --force
+          fi
